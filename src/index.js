@@ -19,21 +19,11 @@ class AccountListCommand extends Command {
     // const mnemonic = await cli.prompt('Please provide a mnemonic')
     const {args} = this.parse(AccountListCommand)
     const hdNode = ethers.utils.HDNode.fromMnemonic(args.mnemonic)
-    const accountList = []
     for (let i = 0; i < 10; i++) {
       const derivationPath = getDerivationPath(i)
       const account = hdNode.derivePath(derivationPath)
-      const formattedData = {
-        index: i,
-        address: account.address,
-      }
-      accountList.push(formattedData)
+      this.log(account.address)
     }
-    const columns = {
-      index: {},
-      address: {},
-    }
-    CliUx.ux.table(accountList, columns, {})
   }
 }
 
