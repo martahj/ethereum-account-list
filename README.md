@@ -1,7 +1,7 @@
-nft-twitter-banner
+Ethereum Account List
 ==================
 
-Allows you to update your twitter account banner with an NFT on a set interval :tada:
+Lists first 10 Ethereum accounts based on mnemonic :tada:
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/nft-twitter-banner.svg)](https://npmjs.org/package/nft-twitter-banner)
@@ -10,12 +10,8 @@ Allows you to update your twitter account banner with an NFT on a set interval :
 
 # Installation
 
-1. You will need a Twitter developer account for API access to upload your banner programatically, you can [sign up here](https://developer.twitter.com/) 
-2. Create a Twitter developer Application/project with **Read and Write** Permissions (Default is read only)
-
-```
-yarn
-```
+1. Run `yarn` to install dependencies
+2. Run command with `./bin/run "<INSERT MNEMONIC>"`
 
 # Usage
 <!-- usage -->
