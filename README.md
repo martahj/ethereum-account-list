@@ -1,7 +1,7 @@
 Ethereum Account List
 ==================
 
-Allows you to update your twitter account banner with an NFT on a set interval :tada:
+Lists first 10 Ethereum accounts based on mnemonic :tada:
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/nft-twitter-banner.svg)](https://npmjs.org/package/nft-twitter-banner)
