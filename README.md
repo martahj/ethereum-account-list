@@ -13,10 +13,6 @@ Allows you to update your twitter account banner with an NFT on a set interval :
 1. Run `yarn` to install dependencies
 2. Run command with `./bin/run "<INSERT MNEMONIC>"`
 
-```
-yarn
-```
-
 # Usage
 <!-- usage -->
 ```sh-session
