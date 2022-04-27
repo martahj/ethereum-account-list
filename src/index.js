@@ -1,35 +1,40 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-console */
+const path = require('path');
+const envLocation = path.resolve(__dirname, '..', '.env');
+require('dotenv').config({ path: envLocation });
 const {Command, flags} = require('@oclif/command')
-const {CliUx} = require('@oclif/core')
-const {cli} = require('cli-ux')
-const ethers = require('ethers')
+const { getEth, getNormalTransactions, getBlockNumber, getInternalTransactions, getEtherscanAddress} = require('./utils/etherscanApi');
 
-const getDerivationPath = index => {
-  const baseDerivationPath = "m/44'/60'/0'/0/"
-  return `${baseDerivationPath}${index}`
-}
 
-class AccountListCommand extends Command {
+class AccountDetailCommand extends Command {
   static args = [
-    {name: 'mnemonic'},
+    { name: 'address'}
   ]
 
   async run() {
-    // const mnemonic = await cli.prompt('Please provide a mnemonic')
-    const {args} = this.parse(AccountListCommand)
-    const hdNode = ethers.utils.HDNode.fromMnemonic(args.mnemonic)
-    for (let i = 0; i < 10; i++) {
-      const derivationPath = getDerivationPath(i)
-      const account = hdNode.derivePath(derivationPath)
-      this.log(account.address)
-    }
+    const {args} = this.parse(AccountDetailCommand)
+    this.getAccountInfo(args.address);
+  }
+
+  async getAccountInfo(address) {
+    const block = await getBlockNumber();
+    const ethBalance = await getEth(address);
+    const transactions = await getNormalTransactions(address, 0, block, 1, 1);
+    const internalTransactions = await getInternalTransactions(address, 0, block, 1, 1);
+    const result = [
+      address,
+      ethBalance > 0,
+      (transactions.length + internalTransactions.length) > 0,
+      getEtherscanAddress(address)
+    ].join(',')
+    this.log(result)
   }
 }
 
-AccountListCommand.description = 'Accepts a mnemonic and returns the list of addresses for given mnemonic'
+AccountDetailCommand.description = 'Accepts a mnemonic and returns the list of addresses for given mnemonic'
 
-AccountListCommand.flags = {
+AccountDetailCommand.flags = {
   // add --version flag to show CLI version
   version: flags.version({char: 'v'}),
   // add --help flag to show CLI version
@@ -37,4 +42,4 @@ AccountListCommand.flags = {
   name: flags.string({char: 'n', description: 'Main command'}),
 }
 
-module.exports = AccountListCommand
+module.exports = AccountDetailCommand

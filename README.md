@@ -1,7 +1,8 @@
-Ethereum Account List
+Account Detail
 ==================
 
-Lists first 10 Ethereum accounts based on mnemonic :tada:
+For a given Ethereum address, outputs info in the following format:
+`address,hasETHbalance,hasTransactions,https://etherscan.io/address/0xaddress`
 
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/nft-twitter-banner.svg)](https://npmjs.org/package/nft-twitter-banner)
@@ -11,13 +12,6 @@ Lists first 10 Ethereum accounts based on mnemonic :tada:
 # Installation
 
 1. Run `yarn` to install dependencies
-2. Run command with `./bin/run "<INSERT MNEMONIC>"`
+2. Add a `.env` file with the `ETHERSCAN_API_KEY` variable
+2. Run command with `./bin/run "<address>"`
 
-# Usage
-<!-- usage -->
-```sh-session
-$ ./bin/run
-...
-```
-
-<!-- commandsstop -->
