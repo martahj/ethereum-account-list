@@ -4,8 +4,23 @@ const path = require('path');
 const envLocation = path.resolve(__dirname, '..', '.env');
 require('dotenv').config({ path: envLocation });
 const {Command, flags} = require('@oclif/command')
-const { getEth, getNormalTransactions, getBlockNumber, getInternalTransactions, getEtherscanAddress} = require('./utils/etherscanApi');
+const polygonScanApi = require('./utils/polygonscanApi');
+const bscscanApi = require('./utils/bscscanApi');
+const etherscanApi = require('./utils/etherscanApi');
 
+const chains = {
+  polygon: polygonScanApi,
+  bsc: bscscanApi,
+  eth: etherscanApi,
+}
+
+const chainsToRun = [
+      'eth',
+    'polygon',
+  'bsc'
+]
+
+const headers = ['chain', 'address', 'addressLink', 'balance', 'lastTxDate'];
 
 class AccountDetailCommand extends Command {
   static args = [
@@ -14,22 +29,49 @@ class AccountDetailCommand extends Command {
 
   async run() {
     const {args} = this.parse(AccountDetailCommand)
-    this.getAccountInfo(args.address);
+    const info = await this.getAccountInfo(args.address);
+    this.log(this.formatCsv(info));
+  }
+
+  async getChainInfo(chain, address) {
+    const api = chains[chain];
+    if (!api) {
+      this.error(`Chain ${chain} is not supported`);
+    }
+    const latestBlock = await api.getBlockNumber();
+    const balance = await api.getBalance(address);
+    const transactions = await api.getNormalTransactions(address, 0, latestBlock, 1, 1); // latest 1 transaction
+    const internalTransactions = await api.getInternalTransactions(address, 0, latestBlock, 1, 1); // latest 1 transaction
+    const lastTransactionTimestamp = transactions.length ? parseInt(transactions[0].timeStamp, 10) : undefined;
+    const lastInternalTransactionTimestamp = internalTransactions.length ? parseInt(internalTransactions[0].timeStamp, 10) : undefined;
+    const latestTimestamp = (lastTransactionTimestamp && lastInternalTransactionTimestamp) ? (lastTransactionTimestamp > lastInternalTransactionTimestamp ? lastTransactionTimestamp : lastInternalTransactionTimestamp) : lastTransactionTimestamp || lastInternalTransactionTimestamp;
+    return {
+      chain,
+      address,
+      latestBlock,
+      link: api.getLink(address),
+      balance,
+      hasTransactions: (transactions.length + internalTransactions.length) > 0,
+      daysSinceLastTransaction: latestTimestamp ? Math.ceil((Date.now() - (latestTimestamp * 1000))/(1000 * 60 * 60 * 24)) : 'n/a',
+    }
   }
 
   async getAccountInfo(address) {
-    const block = await getBlockNumber();
-    const ethBalance = await getEth(address);
-    const transactions = await getNormalTransactions(address, 0, block, 1, 1);
-    const internalTransactions = await getInternalTransactions(address, 0, block, 1, 1);
-    const result = [
-      address,
-      ethBalance > 0,
-      (transactions.length + internalTransactions.length) > 0,
-      getEtherscanAddress(address)
-    ].join(',')
-    this.log(result)
+    const info = await Promise.all(chainsToRun.map(chain => this.getChainInfo(chain, address)))
+    return info;
   }
+
+  formatCsv(results) {
+    const formatted = results.map(({ chain, address, link, balance, daysSinceLastTransaction }) => [
+      chain,
+      address,
+      link,
+      balance,
+      daysSinceLastTransaction,
+    ].join(',')).join('\n')
+    return [headers, formatted].join('\n');
+  }
+
 }
 
 AccountDetailCommand.description = 'Accepts a mnemonic and returns the list of addresses for given mnemonic'
